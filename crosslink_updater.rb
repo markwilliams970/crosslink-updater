@@ -86,8 +86,17 @@ begin
   processed_count = 0
 
   # Reg-ex for types of crosslink
+
+  # Example: 
+  # adpdb00546186
   type_id_only = /^adpdb*/
+
+  # Example: 
+  # http://myserver/cqweb/restapi/7.1.0/adpdb/RECORD/adpdb00554781?format=HTML&noframes=true&recordType=Defect
   type_url_only = /^http*/
+
+  # Example:
+  # <a href="http://myserver/cqweb/#/7.1.0/adpdb/RECORD/adpdb00522935&noframes=true&format=HTML&recordType=Defect">adpdb00522935</a>
   type_full_href = /^\<a href=/
 
   artifact_query_results.each do | this_artifact |
