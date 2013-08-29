@@ -96,12 +96,14 @@ begin
     this_new_crosslink = this_crosslink
 
     # Detect type of crosslink information present
+    detected_match = false
 
     # ID only
     test_match = this_crosslink.match type_id_only
     if !test_match.nil? then
       @logger.info "Crosslink #{this_crosslink} contains ID only."
       crosslink_id = this_crosslink
+      detected_match = true
     end 
 
     # URL only
@@ -109,29 +111,35 @@ begin
     if !test_match.nil? then
       @logger.info "Crosslink #{this_crosslink} contains URL only."
       crosslink_id = this_crosslink.match /adpdb\d+/
+      detected_match = true
     end
 
     # Full href
     test_match = this_crosslink.match type_full_href
     if !test_match.nil? then
       @logger.info "Crosslink #{this_crosslink} contains full HREF."
-      crosslink_id = this_crosslink.match /adpdb\d+/      
+      crosslink_id = this_crosslink.match /adpdb\d+/
+      detected_match = true
     end
 
-    this_new_crosslink = get_updated_crosslink(crosslink_id)
+    if !detected_match then
+      @logger.warning "Crosslink #{this_crosslink} does not match known patterns. Skipped."
+    else
+      this_new_crosslink = get_updated_crosslink(crosslink_id)
 
-    # Try the update
-    begin
-      this_object_id = this_artifact["ObjectID"]
-      update_fields = {}
-      update_fields["#{$crosslink_field_name }"] = this_new_crosslink
-      updated_artifact = @rally.update("#{$artifact_type}", this_object_id, update_fields)
-      @logger.info "Artifact #{this_artifact["FormattedID"]}: crosslink updated from #{this_crosslink} to #{this_new_crosslink}."      
-    rescue => ex
-      @logger.error "Error occurred attempting to update crosslink field: " + ex.message
-      @logger.error ex.backtrace
-    end      
-    processed_count += 1
+      # Try the update
+      begin
+        this_object_id = this_artifact["ObjectID"]
+        update_fields = {}
+        update_fields["#{$crosslink_field_name }"] = this_new_crosslink
+        updated_artifact = @rally.update("#{$artifact_type}", this_object_id, update_fields)
+        @logger.info "Artifact #{this_artifact["FormattedID"]}: crosslink updated from #{this_crosslink} to #{this_new_crosslink}."      
+      rescue => ex
+        @logger.error "Error occurred attempting to update crosslink field: " + ex.message
+        @logger.error ex.backtrace
+      end      
+      processed_count += 1
+    end
   end
   
   @logger.info "Done! Updated crosslink field for a total of: #{processed_count} Artifacts of type #{$artifact_type}."
