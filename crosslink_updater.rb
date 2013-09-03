@@ -26,7 +26,8 @@ $artifact_type          = :defect # Valid values: :hierarchicalrequirement, :def
 $crosslink_field_name   = "CQDefectlink"
 $old_server_hostname_fq = "myoldserver.company.com"
 $new_server_hostname_fq = "mynewserver.company.com"
-$record_url_prefix      = "/cqweb/#/7.1.0/adpdb/RECORD/"
+$target_cq_version      = "7.1.2"
+$record_url_prefix      = "/cqweb/#/#{$target_cq_version}/adpdb/RECORD/"
 $record_url_suffix      = "&noframes=true&format=HTML&recordType=Defect"
 
 def get_updated_crosslink(crosslink_id)
