@@ -27,7 +27,8 @@ $crosslink_field_name   = "CQDefectlink"
 $old_server_hostname_fq = "myoldserver.company.com"
 $new_server_hostname_fq = "mynewserver.company.com"
 $target_cq_version      = "7.1.2"
-$record_url_prefix      = "/cqweb/#/#{$target_cq_version}/adpdb/RECORD/"
+$cq_dbid                = "mycqdb"
+$record_url_prefix      = "/cqweb/#/#{$target_cq_version}/#{$cq_dbid}/RECORD/"
 $record_url_suffix      = "&noframes=true&format=HTML&recordType=Defect"
 
 def get_updated_crosslink(crosslink_id)
@@ -62,7 +63,7 @@ begin
 
   query_string = "(#{$crosslink_field_name} != \"\")"
   @logger.info "Querying Rally for Artifacts of type #{$artifact_type} where #{query_string}"
-  artifact_fetch = "ObjectID,FormattedID,Name,#{$crosslink_field_name}"
+  artifact_fetch = "ObjectID,FormattedID,Name,#{$crosslink_field_name},Project,Name"
   @logger.info "Fetching fields: #{artifact_fetch}."
 
   artifact_query = RallyAPI::RallyQuery.new()
@@ -74,25 +75,25 @@ begin
   artifact_query.query_string = query_string
 
   artifact_query_results = @rally.find(artifact_query)
-  
+
   if artifact_query_results.total_result_count == 0 then
-    @logger.warning "No Artifacts matching criteria #{query_string} found. Exiting."
+    @logger.warn "No Artifacts matching criteria #{query_string} found. Exiting."
     exit
   end
-  
+
   artifact_count = artifact_query_results.total_result_count
   @logger.info "Found a total of: #{artifact_count} Artifacts to process."
-  
+
   # Loop through Artifacts and update crosslink field.
   processed_count = 0
 
   # Reg-ex for types of crosslink
 
-  # Example: 
+  # Example:
   # adpdb00546186
   type_id_only = /^adpdb*/
 
-  # Example: 
+  # Example:
   # http://myserver/cqweb/restapi/7.1.0/adpdb/RECORD/adpdb00554781?format=HTML&noframes=true&recordType=Defect
   type_url_only = /^http*/
 
@@ -101,7 +102,7 @@ begin
   type_full_href = /^\<a href=/
 
   artifact_query_results.each do | this_artifact |
-    
+
     this_crosslink = this_artifact["#{$crosslink_field_name}"]
     this_new_crosslink = this_crosslink
 
@@ -114,7 +115,7 @@ begin
       @logger.info "Crosslink #{this_crosslink} contains ID only."
       crosslink_id = this_crosslink
       detected_match = true
-    end 
+    end
 
     # URL only
     test_match = this_crosslink.match type_url_only
@@ -133,7 +134,8 @@ begin
     end
 
     if !detected_match then
-      @logger.warning "Crosslink #{this_crosslink} does not match known patterns. Skipped."
+      this_formatted_id = this_artifact["FormattedID"]
+      @logger.warn "Crosslink #{this_crosslink} for artifact #{this_formatted_id} does not match known patterns. Skipped."
     else
       this_new_crosslink = get_updated_crosslink(crosslink_id)
 
@@ -143,15 +145,15 @@ begin
         update_fields = {}
         update_fields["#{$crosslink_field_name }"] = this_new_crosslink
         updated_artifact = @rally.update("#{$artifact_type}", this_object_id, update_fields)
-        @logger.info "Artifact #{this_artifact["FormattedID"]}: crosslink updated from #{this_crosslink} to #{this_new_crosslink}."      
+        @logger.info "Artifact #{this_artifact["FormattedID"]}: crosslink updated from #{this_crosslink} to #{this_new_crosslink}."
       rescue => ex
         @logger.error "Error occurred attempting to update crosslink field: " + ex.message
         @logger.error ex.backtrace
-      end      
+      end
       processed_count += 1
     end
   end
-  
+
   @logger.info "Done! Updated crosslink field for a total of: #{processed_count} Artifacts of type #{$artifact_type}."
 
 end
