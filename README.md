@@ -7,6 +7,7 @@ Requirements:
 
 1. Tested with Ruby 1.9.3
 2. [Rally API](https://rubygems.org/gems/rally_api) 0.9.25 or higher
+3. [Logger Gem](http://rubygems.org/gems/logger)
 
 Usage:
 
