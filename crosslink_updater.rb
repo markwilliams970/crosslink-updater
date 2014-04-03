@@ -98,7 +98,7 @@ begin
   type_url_only = /^http*/
 
   # Example:
-  # <a href="http://myserver/cqweb/#/7.1.0/mycqdb/RECORD/mycqdb00522935&noframes=true&format=HTML&recordType=Defect">adpdb00522935</a>
+  # <a href="http://myserver/cqweb/#/7.1.0/mycqdb/RECORD/mycqdb00522935&noframes=true&format=HTML&recordType=Defect">mycqdb00522935</a>
   type_full_href = /^\<a href=/
 
   artifact_query_results.each do | this_artifact |
