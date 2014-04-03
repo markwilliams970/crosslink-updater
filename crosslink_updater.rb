@@ -91,7 +91,7 @@ begin
 
   # Example:
   # mycqdb00546186
-  type_id_only = /^#{$mycqdb}*/
+  type_id_only = /^#{$cq_dbid}*/
 
   # Example:
   # http://myserver/cqweb/restapi/7.1.0/mycqdb/RECORD/mycqdb00554781?format=HTML&noframes=true&recordType=Defect
