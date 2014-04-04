@@ -121,7 +121,7 @@ begin
     test_match = this_crosslink.match type_url_only
     if !test_match.nil? then
       @logger.info "Crosslink #{this_crosslink} contains URL only."
-      crosslink_id = this_crosslink.match /adpdb\d+/
+      crosslink_id = this_crosslink.match /#{$cq_dbid}\d+/
       detected_match = true
     end
 
@@ -129,7 +129,7 @@ begin
     test_match = this_crosslink.match type_full_href
     if !test_match.nil? then
       @logger.info "Crosslink #{this_crosslink} contains full HREF."
-      crosslink_id = this_crosslink.match /adpdb\d+/
+      crosslink_id = this_crosslink.match /#{$cq_dbid}\d+/
       detected_match = true
     end
 
